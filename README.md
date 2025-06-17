@@ -167,5 +167,83 @@ Frontend (or System)
 
 ---
 
+## 📘 AWS Lambda Learning Path
+
+A progressive guide to help you become proficient in building serverless apps using AWS Lambda and .NET.
+
+### 🚀 Stage 1: Beginner – Understanding the Basics
+- **What is Lambda**: A serverless compute service that runs your C# code on demand.
+- **Entry Point**: Your C# method `FunctionHandler()` is invoked by AWS.
+```csharp
+public class Function {
+    public string FunctionHandler(string input, ILambdaContext context) {
+        return $"Hello {input} from Lambda!";
+    }
+}
+```
+- **Deploy**: Use `dotnet lambda deploy-function MyFunctionName`
+
+---
+
+### 🧰 Stage 2: Intermediate – Web APIs & Dependency Injection
+- Use ASP.NET Core APIs in Lambda via `Amazon.Lambda.AspNetCoreServer`
+- Register AWS services using:
+```csharp
+builder.Services.AddAWSService<IAmazonS3>();
+```
+- Deploy with `dotnet lambda deploy-serverless`
+
+---
+
+### ⚙️ Stage 3: Configuration & Deployment
+- Use `aws-lambda-tools-defaults.json` to define:
+  - Runtime: `dotnet8`
+  - Memory, Timeout, Region, Handler
+```bash
+# CLI Deployment
+$ dotnet lambda deploy-serverless
+```
+
+---
+
+### 📊 Stage 4: Advanced Lambda Scenarios
+- **S3 Trigger**
+```csharp
+public async Task FunctionHandler(S3Event evnt, ILambdaContext context) {
+    foreach (var record in evnt.Records) {
+        var key = record.S3.Object.Key;
+    }
+}
+```
+- **SQS Batch Processing**
+```csharp
+public async Task FunctionHandler(SQSEvent evnt, ILambdaContext context) {
+    foreach (var message in evnt.Records) {
+        var payload = message.Body;
+    }
+}
+```
+
+---
+
+### 🔐 Stage 5: Best Practices
+| Practice                     | Why                                      |
+|-----------------------------|-------------------------------------------|
+| Stateless                   | Enables scaling across many containers    |
+| Environment Variables       | Externalize config                        |
+| Logging with CloudWatch     | Debug and monitor                         |
+| IAM Roles                   | Secure access to AWS services             |
+| Minimize Cold Start         | Avoid heavy libraries                     |
+
+---
+
+### 🔁 Tools You Should Know
+- `Amazon.Lambda.Tools` – CLI for deploying Lambda
+- `Amazon.Lambda.AspNetCoreServer` – bridge ASP.NET and Lambda
+- `AWSSDK.*` – official AWS service SDKs
+- CloudWatch, IAM, API Gateway, DynamoDB, S3
+
+---
+
 ## 📬 Contact
 Built by Sudhir Singh Thakur · [LinkedIn](https://www.linkedin.com/in/sudhir-singh-thakur-55892196/) · [GitHub](https://github.com/SudhirSinghThakur)
