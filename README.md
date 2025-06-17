@@ -19,9 +19,13 @@ repo/
 │       ├── Models/
 │       ├── Services/
 │       ├── Tests/
+│       ├── LambdaEntryPoint.cs
+│       ├── aws-lambda-tools-defaults.json
+│       ├── .gitignore
 │       └── Program.cs, Startup.cs, etc.
 ├── frontend/
-│   └── src/components/ImpressionDashboard.jsx
+│   ├── src/components/ImpressionDashboard.jsx
+│   └── .gitignore
 ├── README.md
 ```
 
@@ -37,6 +41,54 @@ dotnet run
 4. Deploy to AWS Lambda:
 ```bash
 dotnet lambda deploy-serverless
+```
+
+### 📄 `LambdaEntryPoint.cs`
+
+#### ℹ️ Why We Use `Amazon.Lambda.AspNetCoreServer`
+In traditional ASP.NET Core apps, a web server like Kestrel handles HTTP requests. However, AWS Lambda doesn’t run a web server. 
+
+To run ASP.NET Core inside AWS Lambda, we use the `Amazon.Lambda.AspNetCoreServer` NuGet package. It acts as a bridge that transforms incoming AWS API Gateway requests into ASP.NET Core compatible HTTP context.
+
+The `LambdaEntryPoint.cs` file is the Lambda function handler and initializes the application using the Startup class.
+
+✅ This setup enables serverless hosting of ASP.NET Core Web APIs inside AWS Lambda.
+```csharp
+public class LambdaEntryPoint : Amazon.Lambda.AspNetCoreServer.APIGatewayProxyFunction
+{
+    protected override void Init(IWebHostBuilder builder)
+    {
+        builder.UseStartup<Startup>();
+    }
+}
+```
+
+### 📄 `aws-lambda-tools-defaults.json`
+
+#### ℹ️ What is `aws-lambda-tools-defaults.json`?
+This file is used by the AWS Lambda .NET CLI (`Amazon.Lambda.Tools`) to configure and automate deployment of your Lambda function.
+
+It includes settings like:
+- Lambda function name and runtime
+- Memory size, timeout, region
+- Entry point handler (`FunctionHandlerAsync`)
+
+✅ Instead of manually setting these values in the AWS Console, just run:
+```bash
+dotnet lambda deploy-serverless
+```
+…and this file will be used to deploy your function automatically.
+```json
+{
+  "function-name": "AdImpressionAPI",
+  "function-handler": "AdImpressionService::AdImpressionService.LambdaEntryPoint::FunctionHandlerAsync",
+  "framework": "net8.0",
+  "function-runtime": "dotnet8",
+  "function-memory-size": 512,
+  "function-timeout": 30,
+  "region": "us-east-1",
+  "configuration": "Release"
+}
 ```
 
 ---
