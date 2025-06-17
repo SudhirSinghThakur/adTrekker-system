@@ -93,49 +93,6 @@ dotnet lambda deploy-serverless
 
 ---
 
-## ✅ Unit Tests
-Run backend tests:
-```bash
-cd backend/AdImpressionService
-dotnet test
-```
-
----
-
-## 🧪 Sample Unit Tests
-### `S3UploaderTests.cs`
-```csharp
-[Fact]
-public async Task UploadAsync_ValidInput_UploadsToS3()
-{
-    var s3Mock = new Mock<IAmazonS3>();
-    var uploader = new S3Uploader(s3Mock.Object);
-
-    var impression = new AdImpression { ImpressionId = "test-id", CampaignId = "cmp1", Timestamp = DateTime.UtcNow };
-
-    await uploader.UploadAsync(impression);
-
-    s3Mock.Verify(x => x.PutObjectAsync(It.IsAny<PutObjectRequest>(), It.IsAny<CancellationToken>()), Times.Once);
-}
-```
-
-### `AdImpressionControllerTests.cs`
-```csharp
-[Fact]
-public async Task Post_ValidImpression_ReturnsOk()
-{
-    var s3Mock = new Mock<S3Uploader>();
-    var loggerMock = new Mock<DynamoLogger>();
-
-    var controller = new AdImpressionController(s3Mock.Object, loggerMock.Object);
-    var result = await controller.Post(new AdImpression { ImpressionId = "1", CampaignId = "c1", Timestamp = DateTime.UtcNow });
-
-    Assert.IsType<OkObjectResult>(result);
-}
-```
-
----
-
 ## 🌐 Frontend Setup
 1. Navigate to `frontend/`
 2. Install dependencies:
@@ -187,6 +144,20 @@ export default function ImpressionDashboard() {
   );
 }
 ```
+
+---
+
+## 🔁 End-to-End Flow Summary
+Frontend (or System)
+   ⬇️ POST /api/v1/impressions
+.NET Controller (validates and delegates)
+   ⬇️ Save raw JSON to S3
+   ⬇️ Save metadata to DynamoDB
+   ✅ Respond 200 OK
+
+⬆️ Later, GET /api/v1/impressions
+⬅️ JSON list from DynamoDB
+⬅️ Displayed in React dashboard
 
 ---
 
